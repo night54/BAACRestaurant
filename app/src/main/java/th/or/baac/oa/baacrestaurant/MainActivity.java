@@ -1,10 +1,15 @@
 package th.or.baac.oa.baacrestaurant;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.StrictMode;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.Toast;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -23,12 +28,17 @@ public class MainActivity extends AppCompatActivity {
     //Explicit
     private UserTable objUserTable;
     private FoodTable objFoodTable;
+    private EditText userEditText, passwordEditText;
+    private String userString, passwordString;
     //End of Explicit
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // Bind Widget
+        bindWidget();
 
         //Create and Connect Database
         createAndConnected();
@@ -39,10 +49,59 @@ public class MainActivity extends AppCompatActivity {
         //Delete all data
         deleteAllSQLite();
 
+        //sync JSON to SQLite
         synJSONtoSQLite();
 
-
     } // End of Main Method
+
+    private void bindWidget() {
+        userEditText = (EditText) findViewById(R.id.editText);
+        passwordEditText = (EditText) findViewById(R.id.editText2);
+    }
+
+
+    public void clickLogin(View view) {
+        userString = userEditText.getText().toString().trim();
+        passwordString = passwordEditText.getText().toString().trim();
+
+        if (userString.equals("") || passwordString.equals("")) {
+            //Have space
+            errorDialog("Have space", "Please fill all every blank");
+        } else {
+            //No space
+            checkUser();
+        }
+    } // End of clickLogin
+
+    private void checkUser() {
+        try {
+            String[] strMyResult = objUserTable.searchUser(userString);
+
+            if (passwordString.equals(strMyResult[2])) {
+                Toast.makeText(MainActivity.this, "Welcome " + strMyResult[3], Toast.LENGTH_LONG).show();
+            } else {
+                errorDialog("Password false", "Please try again. Password false");
+            }
+        } catch (Exception e) {
+            errorDialog("No this user", "No " + userString + " on my Database");
+        }
+    }
+
+    private void errorDialog(String strTitle, String strMessage) {
+        AlertDialog.Builder objBuilder = new AlertDialog.Builder(this);
+        objBuilder.setIcon(R.drawable.danger);
+        objBuilder.setTitle(strTitle);
+        objBuilder.setMessage(strMessage);
+        objBuilder.setCancelable(false);
+        objBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.dismiss();
+            }
+        });
+        objBuilder.show();
+
+    }
 
     private void synJSONtoSQLite() {
 
@@ -50,7 +109,7 @@ public class MainActivity extends AppCompatActivity {
         StrictMode.ThreadPolicy myThreadPolicy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(myThreadPolicy);
 
-        int intTimes = 0; // check number of tables
+        int intTimes = 0;
         while (intTimes <= 1) {
 
             //Create InputStream
@@ -127,7 +186,9 @@ public class MainActivity extends AppCompatActivity {
                             String strFood = jsonObject.getString("Food");
                             String strSource = jsonObject.getString("Source");
                             String strPrice = jsonObject.getString("Price");
-                            objFoodTable.addNewFood(strFood, strSource, strPrice);
+                            objUserTable.addNewUser(strFood, strSource, strPrice);
+                            break;
+                        default:
                             break;
                     }
 
