@@ -2,6 +2,7 @@ package th.or.baac.oa.baacrestaurant;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.StrictMode;
 import android.support.v7.app.AppCompatActivity;
@@ -79,6 +80,13 @@ public class MainActivity extends AppCompatActivity {
 
             if (passwordString.equals(strMyResult[2])) {
                 Toast.makeText(MainActivity.this, "Welcome " + strMyResult[3], Toast.LENGTH_LONG).show();
+
+                // Intent to OrderActivity
+                Intent orderIntent = new Intent(MainActivity.this, OrderActivity.class);
+                orderIntent.putExtra("Name", strMyResult[3]);
+                startActivity(orderIntent);
+
+                finish(); // close MainActivity
             } else {
                 errorDialog("Password false", "Please try again. Password false");
             }
@@ -142,7 +150,7 @@ public class MainActivity extends AppCompatActivity {
 
                 Log.d("baac", "InputStream ==>" + e.toString());
 
-            }
+            } // End of try create InputStream
 
             //Create JSON String
             try {
@@ -164,7 +172,7 @@ public class MainActivity extends AppCompatActivity {
 
                 Log.d("baac", "strJSON ==>" + e.toString());
 
-            }
+            } // End of try create JSON String
 
             //Update SQLite
             try {
@@ -186,7 +194,7 @@ public class MainActivity extends AppCompatActivity {
                             String strFood = jsonObject.getString("Food");
                             String strSource = jsonObject.getString("Source");
                             String strPrice = jsonObject.getString("Price");
-                            objUserTable.addNewUser(strFood, strSource, strPrice);
+                            objFoodTable.addNewFood(strFood, strSource, strPrice);
                             break;
                         default:
                             break;
@@ -198,7 +206,7 @@ public class MainActivity extends AppCompatActivity {
 
                 Log.d("baac", "Update ==>" + e.toString());
 
-            }
+            } // End of try update SQLite
 
             intTimes++;
 
@@ -217,7 +225,7 @@ public class MainActivity extends AppCompatActivity {
     private void testerAdd() {
 
         objUserTable.addNewUser("night54", "1234", "Krongrat Chanakok");
-        objFoodTable.addNewFood("Noodle", "testSource", "40");
+        objFoodTable.addNewFood("Noodle", "testSource.png", "40");
 
     }
 

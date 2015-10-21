@@ -2,7 +2,9 @@ package th.or.baac.oa.baacrestaurant;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 /**
  * Created by BAAC on 10/19/2015.
@@ -27,6 +29,44 @@ public class FoodTable {
         readSqLiteDatabase = objMyOpenHelper.getReadableDatabase();
 
     } // End of Constructor
+
+    public String[] readAllData(int intType) {
+        String[] strResult = null;
+        Cursor objCursor = readSqLiteDatabase.query(
+                TABLE_FOOD,
+                new String[]{COLUMN_ID, COLUMN_FOOD, COLUMN_PRICE, COLUMN_SOURCE},
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+        Log.d("baac", "objCursor count = " + String.valueOf(objCursor.getCount()));
+        if (objCursor != null) {
+            objCursor.moveToFirst();
+            strResult = new String[objCursor.getCount()];
+            for (int index = 0; index < objCursor.getCount(); index++) {
+                switch (intType) {
+                    case 0:
+                        strResult[index] = objCursor.getString(objCursor.getColumnIndex(COLUMN_FOOD));
+                        break;
+                    case 1:
+                        strResult[index] = objCursor.getString(objCursor.getColumnIndex(COLUMN_PRICE));
+                        break;
+                    case 2:
+                        strResult[index] = objCursor.getString(objCursor.getColumnIndex(COLUMN_SOURCE));
+                        break;
+                    default:
+                        // strResult[index] = objCursor.getString(objCursor.getColumnIndex(COLUMN_ID));
+                        break;
+                } // End of switch
+                objCursor.moveToNext();
+            } // End of for
+        } // End of if
+        objCursor.close();
+
+        return strResult;
+    }
 
     public long addNewFood(String strFood, String strSource, String strPrice) {
 
